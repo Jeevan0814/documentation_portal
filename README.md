@@ -7,6 +7,8 @@ Vidyapeetham, Coimbatore, and guided by Dr. Radhika N.
 
 **Live site:** https://jeevan0814.github.io/documentation_portal/
 
+**Project source code:** https://github.com/a5hx/Zero-Trust-Enabled-SDN-Architecture
+
 The portal covers the project objectives, problem statement, methodology, results,
 team, progress, documentation, GitHub links and the demonstration video.
 
