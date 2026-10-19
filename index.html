@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Zero Trust SDN for Edge Load Balancing</title>
   <meta name="description" content="Project portal for Zero Trust–Enabled SDN Architecture for Secure and Intelligent Load Balancing in Edge Networks, Team 50, Department of CSE, Amrita Vishwa Vidyapeetham, Coimbatore.">
-  <meta name="theme-color" content="#f4f5f2" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#141a24" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#050608">
+  <meta name="color-scheme" content="dark">
   <meta property="og:title" content="Zero Trust SDN for Edge Load Balancing">
   <meta property="og:description" content="An SDN controller that scores edge servers on observed behaviour and revokes misbehaving ones as real OpenFlow rules.">
   <meta property="og:image" content="assets/img/architecture.webp">
@@ -33,6 +33,7 @@
         <a href="#objectives">Objectives</a>
         <a href="#method">Methodology</a>
         <a href="#results">Results</a>
+        <a href="#paper">Paper</a>
         <a href="#team">Team</a>
         <a href="#progress">Progress</a>
         <a href="#docs">Documentation</a>
@@ -46,6 +47,32 @@
 
     <!-- Hero -->
     <section class="hero" id="top">
+      <svg class="topo" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+        <g class="topo-links">
+          <line x1="600" y1="80" x2="150" y2="260"/><line x1="600" y1="80" x2="280" y2="300"/>
+          <line x1="600" y1="80" x2="420" y2="330"/><line x1="600" y1="80" x2="540" y2="350"/>
+          <line x1="600" y1="80" x2="660" y2="350"/><line x1="600" y1="80" x2="780" y2="330"/>
+          <line x1="600" y1="80" x2="920" y2="300"/><line x1="600" y1="80" x2="1050" y2="260"/>
+          <line x1="150" y1="260" x2="110" y2="430"/><line x1="150" y1="260" x2="200" y2="440"/>
+          <line x1="280" y1="300" x2="250" y2="470"/><line x1="420" y1="330" x2="400" y2="480"/>
+          <line x1="540" y1="350" x2="520" y2="490"/><line x1="660" y1="350" x2="690" y2="490"/>
+          <line x1="780" y1="330" x2="810" y2="480"/><line x1="920" y1="300" x2="950" y2="470"/>
+          <line x1="1050" y1="260" x2="1010" y2="440"/><line x1="1050" y1="260" x2="1100" y2="430"/>
+        </g>
+        <line class="topo-cut" x1="600" y1="80" x2="660" y2="350"/>
+        <g class="topo-nodes">
+          <rect x="584" y="64" width="32" height="32" rx="7"/>
+          <circle cx="150" cy="260" r="9"/><circle cx="280" cy="300" r="9"/><circle cx="420" cy="330" r="9"/>
+          <circle cx="540" cy="350" r="9"/><circle cx="780" cy="330" r="9"/>
+          <circle cx="920" cy="300" r="9"/><circle cx="1050" cy="260" r="9"/>
+          <circle cx="110" cy="430" r="4"/><circle cx="200" cy="440" r="4"/><circle cx="250" cy="470" r="4"/>
+          <circle cx="400" cy="480" r="4"/><circle cx="520" cy="490" r="4"/><circle cx="690" cy="490" r="4"/>
+          <circle cx="810" cy="480" r="4"/><circle cx="950" cy="470" r="4"/><circle cx="1010" cy="440" r="4"/>
+          <circle cx="1100" cy="430" r="4"/>
+        </g>
+        <circle class="topo-turncoat-ring" cx="660" cy="350" r="22"/>
+        <circle class="topo-turncoat" cx="660" cy="350" r="10"/>
+      </svg>
       <div class="wrap hero-grid">
         <div class="hero-copy">
           <p class="course">23CSE498 Project Phase 2, Team 50</p>
@@ -422,6 +449,90 @@
       </div>
     </section>
 
+    <!-- Research paper -->
+    <section class="section" id="paper" aria-labelledby="paper-h">
+      <div class="wrap">
+        <h2 id="paper-h">Research paper</h2>
+        <article class="paper">
+          <p class="paper-status">Draft manuscript, October 2026. Not yet submitted.</p>
+          <h3 class="paper-title">When the Trust Score Cannot Fire: An Ablation of Two-Rail Continuous Verification for Zero-Trust Edge Load Balancing</h3>
+          <p class="paper-authors">K R Jeevan Raj, Aravind Kumar M, Arjun Krishnakumar, Ashwin Kumar RM, Bhuvanesh S. Faculty guide: Dr. Radhika N.</p>
+
+          <div class="paper-body">
+            <div class="abstract">
+              <h4>Abstract</h4>
+              <p>
+                Zero Trust doctrine requires continuous verification of every entity, but says nothing
+                about how a network control plane verifies the serving infrastructure of an edge network
+                or acts on the verdict in the forwarding path. Trust-aware schedulers answer with a trust
+                score: a weighted sum of service-derived features, thresholded to decide eligibility. We
+                show by ablation that a score of this form is structurally unable to isolate an important
+                class of adversary, and that a second, independent decision rail is therefore necessary
+                rather than merely convenient.
+              </p>
+              <p>
+                We build a Zero-Trust SDN load balancer in which trust ranks eligible nodes while an
+                anomaly gate excludes them, with decisions installed as OpenFlow 1.3 rules. On an
+                8-server, 40-device emulated edge carrying six concurrently armed attacks, we run three
+                arms of five live runs each: no enforcement, score-rail enforcement only, and both rails.
+                Across all 15 runs the trust score of the two attackers that never fail a task never once
+                falls below the isolation threshold, and with only the score rail enforced neither is ever
+                quarantined. With the gate enabled both are quarantined in every run. We also report a
+                negative result and retract a trade-off we claimed in earlier work.
+              </p>
+            </div>
+
+            <dl class="paper-results">
+              <div><dt>0 of 15</dt><dd>runs in which a never-failing attacker's trust fell below 0.30</dd></div>
+              <div><dt>0/5 → 5/5</dt><dd>Sybil and on-off attackers quarantined, score rail only versus both rails</dd></div>
+              <div><dt>17.4 % → 11.6 %</dt><dd>share of traffic reaching attackers once the gate is on</dd></div>
+              <div><dt>176 → 137 ms</dt><dd>p95 latency, with no significant change in delivery or throughput</dd></div>
+            </dl>
+          </div>
+
+          <h4 class="paper-sub">Contents</h4>
+          <ol class="paper-toc" type="I">
+            <li>Introduction</li>
+            <li>Related work</li>
+            <li>Threat model and assumptions</li>
+            <li>System architecture: the trust score and the anomaly gate</li>
+            <li>Why a score alone cannot isolate a faithful liar</li>
+            <li>Evaluation methodology: three arms, five live runs each</li>
+            <li>Results</li>
+            <li>Discussion</li>
+            <li>Threats to validity</li>
+          </ol>
+
+          <h4 class="paper-sub">References</h4>
+          <p class="refs-note">The 22 works the paper cites. The closest prior work on trust-aware and zero-trust edge load balancing is marked.</p>
+          <ol class="refs">
+            <li value="1"><span class="ref-authors">S. Rose, O. Borchert, S. Mitchell and S. Connelly.</span> <span class="ref-title">Zero Trust Architecture.</span> <span class="ref-venue">NIST Special Publication 800-207, Aug. 2020.</span> <a href="https://doi.org/10.6028/NIST.SP.800-207">doi:10.6028/NIST.SP.800-207</a></li>
+            <li class="closest" value="2"><span class="ref-authors">M. Huang, Z. Li, F. Xiao, S. Long and A. Liu.</span> <span class="ref-title">Trust mechanism-based multi-tier computing system for service-oriented edge-cloud networks.</span> <span class="ref-venue">IEEE Trans. Dependable and Secure Computing, 21(4):1639–1651, 2024.</span> <a href="https://doi.org/10.1109/TDSC.2023.3285927">doi:10.1109/TDSC.2023.3285927</a></li>
+            <li class="closest" value="3"><span class="ref-authors">B. Ali, M. A. Gregory and S. Li.</span> <span class="ref-title">Trust-aware task load balancing in multi-access edge computing based on blockchain and a zero trust security capability framework.</span> <span class="ref-venue">Trans. Emerging Telecommunications Technologies, 34(12):e4845, 2023.</span> <a href="https://doi.org/10.1002/ett.4845">doi:10.1002/ett.4845</a></li>
+            <li value="4"><span class="ref-authors">B. Lantz, B. Heller and N. McKeown.</span> <span class="ref-title">A network in a laptop: rapid prototyping for software-defined networks.</span> <span class="ref-venue">ACM SIGCOMM HotNets, 2010.</span> <a href="https://doi.org/10.1145/1868447.1868466">doi:10.1145/1868447.1868466</a></li>
+            <li class="closest" value="5"><span class="ref-authors">A. Iftikhar, F. B. Hussain, K. N. Qureshi, M. Shiraz and M. Sookhak.</span> <span class="ref-title">Securing edge based smart city networks with software defined networking and zero trust architecture.</span> <span class="ref-venue">Journal of Network and Computer Applications, 2025.</span> <a href="https://doi.org/10.1016/j.jnca.2025.104318">doi:10.1016/j.jnca.2025.104318</a></li>
+            <li value="6"><span class="ref-authors">ETSI.</span> <span class="ref-title">Multi-access Edge Computing (MEC); framework and reference architecture.</span> <span class="ref-venue">GS MEC 003 V3.1.1, 2022.</span></li>
+            <li value="7"><span class="ref-authors">M. Mitzenmacher.</span> <span class="ref-title">The power of two choices in randomized load balancing.</span> <span class="ref-venue">IEEE Trans. Parallel and Distributed Systems, 12(10):1094–1104, 2001.</span> <a href="https://doi.org/10.1109/71.963420">doi:10.1109/71.963420</a></li>
+            <li value="8"><span class="ref-authors">Y. Azar, A. Z. Broder, A. R. Karlin and E. Upfal.</span> <span class="ref-title">Balanced allocations.</span> <span class="ref-venue">SIAM Journal on Computing, 29(1):180–200, 1999.</span> <a href="https://doi.org/10.1137/S0097539795288490">doi:10.1137/S0097539795288490</a></li>
+            <li value="9"><span class="ref-authors">M. Mitzenmacher.</span> <span class="ref-title">How useful is old information?</span> <span class="ref-venue">IEEE Trans. Parallel and Distributed Systems, 11(1):6–20, 2000.</span> <a href="https://doi.org/10.1109/71.824633">doi:10.1109/71.824633</a></li>
+            <li value="10"><span class="ref-authors">M. Dahlin.</span> <span class="ref-title">Interpreting stale load information.</span> <span class="ref-venue">IEEE Trans. Parallel and Distributed Systems, 11(10):1033–1047, 2000.</span> <a href="https://doi.org/10.1109/71.888643">doi:10.1109/71.888643</a></li>
+            <li value="11"><span class="ref-authors">R. Jain, D.-M. Chiu and W. Hawe.</span> <span class="ref-title">A quantitative measure of fairness and discrimination for resource allocation in shared computer systems.</span> <span class="ref-venue">DEC Research Report TR-301, 1984.</span></li>
+            <li value="12"><span class="ref-authors">J. D. C. Little.</span> <span class="ref-title">A proof for the queuing formula: L = λW.</span> <span class="ref-venue">Operations Research, 9(3):383–387, 1961.</span> <a href="https://doi.org/10.1287/opre.9.3.383">doi:10.1287/opre.9.3.383</a></li>
+            <li value="13"><span class="ref-authors">A. Bogdanov, L. R. Knudsen, G. Leander, C. Paar, A. Poschmann, M. J. B. Robshaw, Y. Seurin and C. Vikkelsoe.</span> <span class="ref-title">PRESENT: an ultra-lightweight block cipher.</span> <span class="ref-venue">CHES 2007, LNCS 4727, pp. 450–466.</span> <a href="https://doi.org/10.1007/978-3-540-74735-2_31">doi:10.1007/978-3-540-74735-2_31</a></li>
+            <li value="14"><span class="ref-authors">ISO/IEC.</span> <span class="ref-title">Information security — Lightweight cryptography — Part 2: Block ciphers.</span> <span class="ref-venue">ISO/IEC 29192-2:2019.</span></li>
+            <li value="15"><span class="ref-authors">R. C. Merkle.</span> <span class="ref-title">A digital signature based on a conventional encryption function.</span> <span class="ref-venue">CRYPTO ’87, LNCS 293, pp. 369–378, 1988.</span> <a href="https://doi.org/10.1007/3-540-48184-2_32">doi:10.1007/3-540-48184-2_32</a></li>
+            <li value="16"><span class="ref-authors">D. Ongaro and J. Ousterhout.</span> <span class="ref-title">In search of an understandable consensus algorithm.</span> <span class="ref-venue">USENIX ATC, pp. 305–319, 2014.</span></li>
+            <li value="17"><span class="ref-authors">P. Auer, N. Cesa-Bianchi and P. Fischer.</span> <span class="ref-title">Finite-time analysis of the multiarmed bandit problem.</span> <span class="ref-venue">Machine Learning, 47(2–3):235–256, 2002.</span> <a href="https://doi.org/10.1023/A:1013689704352">doi:10.1023/A:1013689704352</a></li>
+            <li value="18"><span class="ref-authors">M. T. Nygard.</span> <span class="ref-title">Release It!: Design and Deploy Production-Ready Software, 2nd ed.</span> <span class="ref-venue">Pragmatic Bookshelf, 2018.</span></li>
+            <li value="19"><span class="ref-authors">N. McKeown, T. Anderson, H. Balakrishnan, G. Parulkar, L. Peterson, J. Rexford, S. Shenker and J. Turner.</span> <span class="ref-title">OpenFlow: enabling innovation in campus networks.</span> <span class="ref-venue">ACM SIGCOMM Computer Communication Review, 38(2):69–74, 2008.</span> <a href="https://doi.org/10.1145/1355734.1355746">doi:10.1145/1355734.1355746</a></li>
+            <li value="20"><span class="ref-authors">E. B. Wilson.</span> <span class="ref-title">Probable inference, the law of succession, and statistical inference.</span> <span class="ref-venue">J. American Statistical Association, 22(158):209–212, 1927.</span> <a href="https://doi.org/10.1080/01621459.1927.10502953">doi:10.1080/01621459.1927.10502953</a></li>
+            <li value="21"><span class="ref-authors">F. Wilcoxon.</span> <span class="ref-title">Individual comparisons by ranking methods.</span> <span class="ref-venue">Biometrics Bulletin, 1(6):80–83, 1945.</span> <a href="https://doi.org/10.2307/3001968">doi:10.2307/3001968</a></li>
+            <li value="22"><span class="ref-authors">S. Holm.</span> <span class="ref-title">A simple sequentially rejective multiple test procedure.</span> <span class="ref-venue">Scandinavian Journal of Statistics, 6(2):65–70, 1979.</span></li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
     <!-- Team -->
     <section class="section" id="team" aria-labelledby="team-h">
       <div class="wrap">
@@ -518,12 +629,12 @@
             </div>
             <a class="btn" href="https://github.com/bhuvanesh-sudo/turncoat-sdn#readme">Read on GitHub</a>
           </li>
-          <li class="pending">
+          <li>
             <div>
               <h3>Research paper</h3>
-              <p>An IEEE-style manuscript on the trust-formula finding and the controlled evaluation is in preparation.</p>
+              <p>“When the Trust Score Cannot Fire”, an ablation of two-rail continuous verification. Draft, with its abstract, key results and 22 references.</p>
             </div>
-            <span class="tag">In preparation</span>
+            <a class="btn" href="#paper">Read summary</a>
           </li>
           <li class="pending">
             <div>
