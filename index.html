@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zero Trust SDN for Edge Load Balancing</title>
+  <meta name="description" content="Project portal for Zero Trust–Enabled SDN Architecture for Secure and Intelligent Load Balancing in Edge Networks, Team 50, Department of CSE, Amrita Vishwa Vidyapeetham, Coimbatore.">
+  <meta name="theme-color" content="#f4f5f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141a24" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Zero Trust SDN for Edge Load Balancing">
+  <meta property="og:description" content="An SDN controller that scores edge servers on observed behaviour and revokes misbehaving ones as real OpenFlow rules.">
+  <meta property="og:image" content="assets/img/architecture.webp">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-head">
+    <div class="wrap head-row">
+      <a class="brand" href="#top" aria-label="Back to top">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect x="3" y="3" width="26" height="26" rx="6" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M9 21 L14 15 L18 18 L23 10" fill="none" stroke="var(--zt)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Zero Trust SDN</span>
+      </a>
+      <nav class="site-nav" aria-label="Sections">
+        <a href="#problem">Problem</a>
+        <a href="#objectives">Objectives</a>
+        <a href="#method">Methodology</a>
+        <a href="#results">Results</a>
+        <a href="#team">Team</a>
+        <a href="#progress">Progress</a>
+        <a href="#docs">Documentation</a>
+        <a href="#code">GitHub</a>
+        <a href="#demo">Demo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- Hero -->
+    <section class="hero" id="top">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="course">23CSE498 Project Phase 2, Team 50</p>
+          <h1>Zero Trust–Enabled SDN Architecture for Secure and Intelligent Load Balancing in Edge Networks</h1>
+          <p class="lede">
+            Load balancers decide where to send work based on what servers say about themselves.
+            Our SDN controller decides from what it observes instead. It scores every edge server
+            on measured behaviour, and when a server misbehaves it revokes that server in the data
+            plane as real OpenFlow rules, while a hash-chained ledger records why.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="#results">See the results</a>
+            <a class="btn" href="#code">View code on GitHub</a>
+          </div>
+        </div>
+
+        <figure class="finding" aria-labelledby="finding-cap">
+          <figcaption id="finding-cap">
+            <strong>What we found while building it.</strong>
+            A server that lies about its load but still completes its tasks scores:
+          </figcaption>
+          <div class="eq" role="math" aria-label="T equals 0.35 times 1.0 plus 0.25 times 0.96 plus 0.25 times 0 minus 0.15 times 1.0, which equals 0.44">
+            <span class="eq-line">T = 0.35·<b>1.0</b> + 0.25·<b>0.96</b></span>
+            <span class="eq-line">&nbsp;&nbsp;+ 0.25·<b>0</b> − 0.15·<b>1.0</b></span>
+            <span class="eq-result">= 0.44</span>
+          </div>
+          <div class="meter" aria-hidden="true">
+            <div class="meter-track">
+              <div class="meter-fill"></div>
+              <div class="meter-threshold"><span>isolation 0.30</span></div>
+              <div class="meter-value"><span>liar 0.44</span></div>
+            </div>
+            <div class="meter-scale"><span>0</span><span>0.5</span><span>1.0</span></div>
+          </div>
+          <p class="finding-note">
+            0.44 never falls below the 0.30 isolation threshold, so the published trust formula alone
+            can never isolate a competent liar. We added an independent anomaly gate that quarantines
+            on behaviour, whatever the score. Our test suite proves this against the real calculator.
+          </p>
+        </figure>
+      </div>
+
+      <div class="wrap facts">
+        <dl>
+          <div><dt>8 of 8</dt><dd>attacks detected and placed in the right family</dd></div>
+          <div><dt>8.2–11.3 s</dt><dd>from attack onset to isolation; the baseline never isolates</dd></div>
+          <div><dt>4 of 4</dt><dd>non-functional requirements pass on the live run</dd></div>
+          <div><dt>1,004</dt><dd>automated tests, 993 passing, 11 skipped, 0 failing</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- Problem -->
+    <section class="section" id="problem" aria-labelledby="problem-h">
+      <div class="wrap">
+        <h2 id="problem-h">Problem statement</h2>
+        <blockquote class="question">
+          Can an SDN control plane continuously verify edge servers using observed rather than
+          claimed behaviour, and enforce the verdict in the data plane fast enough to matter?
+        </blockquote>
+        <div class="cols-3">
+          <div>
+            <h3>The perimeter fails at the edge</h3>
+            <p>Edge servers sit in roadside cabinets, factory floors and campus racks. Any of them can be opened, rented out, misconfigured or simply selfish. Round-robin and least-connections assume every backend is honest and does its work; neither can ever notice when one isn't.</p>
+          </div>
+          <div>
+            <h3>Self-reported telemetry is easy to game</h3>
+            <p>Kubernetes, cloud auto-scalers and MEC orchestrators all schedule on what nodes claim about themselves. A node that under-reports its load attracts traffic. The attacker breaks no cryptography; it only lies in a field everybody believes.</p>
+          </div>
+          <div>
+            <h3>Zero Trust is a policy, not a mechanism</h3>
+            <p>NIST SP 800-207 says never trust, always verify, continuously. Most products verify users and devices at login. Verifying the serving infrastructure itself, continuously, with routing consequences, is far less settled. That gap is where this project works.</p>
+          </div>
+        </div>
+        <p class="scope-note">
+          <strong>Scope.</strong> We demonstrate one mechanism, behavioural trust plus SDN enforcement,
+          under six modelled attacks, in an emulated network (Mininet with real Open vSwitch and
+          OpenFlow 1.3). We don't claim to solve Zero Trust for edge networks in general, and we
+          don't claim production deployment.
+        </p>
+      </div>
+    </section>
+
+    <!-- Objectives -->
+    <section class="section" id="objectives" aria-labelledby="objectives-h">
+      <div class="wrap">
+        <h2 id="objectives-h">Project objectives</h2>
+        <ul class="objectives">
+          <li>
+            <h3>Score servers on behaviour, continuously</h3>
+            <p>Compute a trust score for every edge server from task outcomes, response time, honesty about load and anomaly signals, updated after every interaction.</p>
+          </li>
+          <li>
+            <h3>Route by trust and load together</h3>
+            <p>Send each new connection to a server that is both trusted and not overloaded, using an EdgeScore with power-of-two-choices sampling.</p>
+          </li>
+          <li>
+            <h3>Enforce verdicts in the data plane</h3>
+            <p>Quarantine a misbehaving server as real OpenFlow rules and re-steer its in-flight work, within a 3-second bound.</p>
+          </li>
+          <li>
+            <h3>Admit only real devices</h3>
+            <p>Authenticate IoT devices with a PRESENT-80 challenge–response, pinned to each device's provisioned source IP.</p>
+          </li>
+          <li>
+            <h3>Keep a tamper-evident record</h3>
+            <p>Commit every trust update to a SHA-256 hash-chained ledger with a Merkle root per block, replicated by RAFT.</p>
+          </li>
+          <li>
+            <h3>Prove it against a control arm</h3>
+            <p>Run the same network, workload and attacks with and without zero trust, and back the difference with statistics over 600 seeded runs.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Methodology -->
+    <section class="section" id="method" aria-labelledby="method-h">
+      <div class="wrap">
+        <h2 id="method-h">Methodology</h2>
+        <p class="section-lede">
+          The product is an os-ken (Ryu fork) OpenFlow 1.3 controller application with a REST and
+          server-sent-events API and a live dashboard. Mininet, the edge-server agents and the IoT
+          clients are its test harness.
+        </p>
+
+        <figure class="plate">
+          <a href="assets/img/architecture.webp" class="plate-link" aria-label="Open the architecture diagram full size">
+            <img src="assets/img/architecture.webp" width="2000" height="1125" loading="lazy"
+                 alt="Five-layer software architecture: data plane of 1 core switch, 8 edge switches, 8 edge servers and 40 IoT devices; trust, security and consensus engines; the SDN control plane in trust_balancer.py; the northbound REST API on port 8081; and presentation and offline analysis.">
+          </a>
+          <figcaption>Five layers in one process. The trust engine and the ledger are libraries the controller calls in-process.</figcaption>
+        </figure>
+
+        <h3 class="sub">How one task flows</h3>
+        <ol class="phases">
+          <li>
+            <span class="phase-key" aria-hidden="true">A</span>
+            <div>
+              <h4>Admission, once per device</h4>
+              <p>The device requests a 64-bit nonce, encrypts it under PRESENT-80 and sends it back. The controller checks the response and the source IP against the provisioned roster. Failure returns 403 and logs the reason.</p>
+            </div>
+          </li>
+          <li>
+            <span class="phase-key" aria-hidden="true">B</span>
+            <div>
+              <h4>Routing, once per connection</h4>
+              <p>The device connects to a virtual IP. The switch asks the controller, which filters to eligible servers, samples two, scores them by EdgeScore and installs rewrite rules to the winner.</p>
+            </div>
+          </li>
+          <li>
+            <span class="phase-key" aria-hidden="true">C</span>
+            <div>
+              <h4>Execution and verdict, once per task</h4>
+              <p>The server does real work, the client reports the outcome and latency, and trust is updated. Every second the controller also polls each server's status and compares claims with observations.</p>
+            </div>
+          </li>
+          <li>
+            <span class="phase-key" aria-hidden="true">D</span>
+            <div>
+              <h4>Enforcement, when a server fails verification</h4>
+              <p>Trust below 0.30, or the anomaly gate firing, triggers one cookie-matched rule delete, drop rules, and re-steering of in-flight work. A probation path lets a recovered server earn its way back.</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="split">
+          <div>
+            <h3 class="sub">The trust model</h3>
+            <p class="formula"><code>T = α·R̄ + β·B̄ + γ·H̄ − δ·Ā</code></p>
+            <p class="formula-weights">α = 0.35, β = 0.25, γ = 0.25, δ = 0.15, with exponential decay λ = 0.85</p>
+            <table class="tbl">
+              <caption class="sr-only">Terms of the trust formula</caption>
+              <thead><tr><th scope="col">Term</th><th scope="col">Measured from</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">R̄ Reliability</th><td>Completed versus failed tasks</td></tr>
+                <tr><th scope="row">B̄ Behaviour</th><td>Response time against the fleet median</td></tr>
+                <tr><th scope="row">H̄ Honesty</th><td>Claimed load versus the duty cycle the controller derives</td></tr>
+                <tr><th scope="row">Ā Anomaly</th><td>Latency, timeout-rate, honesty and flood tells</td></tr>
+              </tbody>
+            </table>
+            <p class="small">Isolation threshold 0.30. Anomaly gate 0.50. Routing uses EdgeScore <code>w₁·T + w₂·(1 − cpu) + w₃·(1 − latency)</code>, with weights tuned online by a UCB1 bandit.</p>
+          </div>
+          <div>
+            <h3 class="sub">Six attacks, each with a delayed onset</h3>
+            <table class="tbl">
+              <caption class="sr-only">Attacks simulated and how each is caught</caption>
+              <thead><tr><th scope="col">Attack</th><th scope="col">How it is caught</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Sybil (load liar)</th><td>Claims to be idle but answers slowly: latency tell</td></tr>
+                <tr><th scope="row">Blackhole</th><td>Drops every task: timeout-rate tell</td></tr>
+                <tr><th scope="row">Grayhole</th><td>Drops half its tasks: timeout rate over a window</td></tr>
+                <tr><th scope="row">On-off</th><td>Alternates honest and hostile phases: sustained intermittency</td></tr>
+                <tr><th scope="row">DDoS flood</th><td>A client sends 24× the normal rate: flood detector, keyed on the client</td></tr>
+                <tr><th scope="row">Identity spoof</th><td>Holds the real key, claims another device: source-IP pin</td></tr>
+              </tbody>
+            </table>
+            <p class="small">Devices with the wrong key entirely are refused at admission as a seventh class.</p>
+          </div>
+        </div>
+
+        <div class="gallery">
+          <figure class="plate">
+            <a href="assets/img/task-workflow.webp" class="plate-link" aria-label="Open the task workflow diagram full size">
+              <img src="assets/img/task-workflow.webp" width="2000" height="1125" loading="lazy"
+                   alt="Sequence diagram of one task: challenge and verify, TCP to the virtual IP, packet-in, EdgeScore selection, flow-mod, result, report, trust update and ledger commit.">
+            </a>
+            <figcaption>One task end to end, from admission to ledger commit.</figcaption>
+          </figure>
+          <figure class="plate">
+            <a href="assets/img/zero-trust-gates.webp" class="plate-link" aria-label="Open the zero trust gates diagram full size">
+              <img src="assets/img/zero-trust-gates.webp" width="2000" height="1125" loading="lazy"
+                   alt="Three zero-trust gates: identity at admission, continuous verification of every report, and graduated response from full service to rate limiting to quarantine, each with its measured counts.">
+            </a>
+            <figcaption>Three gates: identity, continuous verification, graduated response.</figcaption>
+          </figure>
+          <figure class="plate">
+            <a href="assets/img/load-balancing.webp" class="plate-link" aria-label="Open the load balancing diagram full size">
+              <img src="assets/img/load-balancing.webp" width="2000" height="1125" loading="lazy"
+                   alt="Load balancing decision flow: eligibility filter, power-of-two-choices sampling, EdgeScore and epsilon-greedy exploration.">
+            </a>
+            <figcaption>How the controller picks a server for each connection.</figcaption>
+          </figure>
+          <figure class="plate">
+            <a href="assets/img/deployment.webp" class="plate-link" aria-label="Open the deployment diagram full size">
+              <img src="assets/img/deployment.webp" width="2000" height="1125" loading="lazy"
+                   alt="Deployment view: the SDN controller process on ports 6653 and 8081, the Mininet namespaces with 9 switches, 8 servers and 40 devices, and a standalone 3-replica RAFT cluster.">
+            </a>
+            <figcaption>Deployment: controller, Mininet namespaces and the RAFT cluster.</figcaption>
+          </figure>
+        </div>
+
+        <h3 class="sub">Technology stack</h3>
+        <ul class="stack">
+          <li><b>Controller</b> os-ken, OpenFlow 1.3</li>
+          <li><b>Network</b> Mininet, Open vSwitch</li>
+          <li><b>Language</b> Python 3.14</li>
+          <li><b>Crypto</b> PRESENT-80, SHA-256, Merkle trees</li>
+          <li><b>Consensus</b> RAFT, 3 replicas over TCP</li>
+          <li><b>Analysis</b> NumPy, SciPy, Matplotlib</li>
+          <li><b>Testing</b> pytest</li>
+          <li><b>Host</b> Ubuntu 26.04 on WSL2</li>
+        </ul>
+        <p class="small">The original plan named Ryu. Ryu can't run above Python 3.13 and the target OS ships only 3.14, so we use os-ken, its maintained fork with the same API.</p>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="section" id="results" aria-labelledby="results-h">
+      <div class="wrap">
+        <h2 id="results-h">Results so far</h2>
+        <p class="section-lede">
+          Two live runs on 5 September 2026: the same 8 servers, 40 devices and six attacks on the
+          same schedule. The arms differ only in who decides where a connection goes and whether
+          anything acts on trust.
+        </p>
+
+        <div class="legend" aria-hidden="true">
+          <span class="key key-base">Baseline, no zero trust</span>
+          <span class="key key-zt">Zero-trust SDN</span>
+        </div>
+
+        <div class="table-scroll">
+          <table class="tbl compare">
+            <caption class="sr-only">Baseline versus zero-trust on the live run</caption>
+            <thead>
+              <tr><th scope="col">Metric</th><th scope="col" class="c-base">Baseline</th><th scope="col" class="c-zt">Zero trust</th><th scope="col">What it means</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Packet delivery ratio</th><td class="c-base">94.29 %</td><td class="c-zt">99.10 %</td><td>Fewer tasks lost outright</td></tr>
+              <tr><th scope="row">Honest-device availability</th><td class="c-base">85.67 %</td><td class="c-zt">99.00 %</td><td>The service honest devices actually received</td></tr>
+              <tr><th scope="row">Honest devices served below 50 %</th><td class="c-base">5</td><td class="c-zt">0</td><td>Nobody left starving behind a bad server</td></tr>
+              <tr><th scope="row">Tasks lost to timeout</th><td class="c-base">380</td><td class="c-zt">58</td><td>85 % fewer</td></tr>
+              <tr><th scope="row">p95 task latency</th><td class="c-base">260.0 ms</td><td class="c-zt">134.3 ms</td><td>The slow tail halves</td></tr>
+              <tr><th scope="row">Mean task latency</th><td class="c-base">83.7 ms</td><td class="c-zt">88.5 ms</td><td>We lose by 4.8 ms; see below</td></tr>
+              <tr><th scope="row">Throughput</th><td class="c-base">20.74 task/s</td><td class="c-zt">20.66 task/s</td><td>Unchanged, so the gain isn't bought by serving less</td></tr>
+              <tr><th scope="row">Requests routed to attackers</th><td class="c-base">30.5 %</td><td class="c-zt">12.5 %</td><td>Less than half as much work handed to attackers</td></tr>
+              <tr><th scope="row">Identity spoof</th><td class="c-base">Admitted</td><td class="c-zt">Refused</td><td>The baseline ran 130 tasks under a stolen identity</td></tr>
+              <tr><th scope="row">Wrong-key devices admitted</th><td class="c-base">2</td><td class="c-zt">0</td><td>The baseline has no admission control</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small honest">
+          <strong>Where we lose.</strong> Mean latency is 4.8 ms worse. We pay a small cost in the
+          mean to remove the long tail: p95 halves, timeouts fall 85 % and throughput is unchanged.
+        </p>
+
+        <div class="split">
+          <div>
+            <h3 class="sub">Time from attack onset to isolation</h3>
+            <table class="tbl">
+              <caption class="sr-only">Containment time per attacked server</caption>
+              <thead><tr><th scope="col">Server</th><th scope="col">Attack</th><th scope="col" class="c-base">Baseline</th><th scope="col" class="c-zt">Zero trust</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">srv3</th><td>Sybil</td><td class="c-base">never</td><td class="c-zt">8.2 s</td></tr>
+                <tr><th scope="row">srv6</th><td>Blackhole</td><td class="c-base">never</td><td class="c-zt">8.7 s</td></tr>
+                <tr><th scope="row">srv8</th><td>On-off</td><td class="c-base">never</td><td class="c-zt">9.9 s</td></tr>
+                <tr><th scope="row">srv1</th><td>Grayhole</td><td class="c-base">never</td><td class="c-zt">11.3 s</td></tr>
+              </tbody>
+            </table>
+            <p class="small">The baseline raised 502 anomalies and acted on none, because it has no quarantine path. That is exactly the cost the experiment measures.</p>
+          </div>
+          <div>
+            <h3 class="sub">Non-functional requirements</h3>
+            <table class="tbl">
+              <caption class="sr-only">Non-functional requirements, target and measured</caption>
+              <thead><tr><th scope="col">Requirement</th><th scope="col">Target</th><th scope="col">Measured</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Routing decision</th><td>&lt; 200 ms</td><td>0.53 ms mean <span class="pass">Pass</span></td></tr>
+                <tr><th scope="row">Isolation and re-dispatch</th><td>&lt; 3,000 ms</td><td>25.6 ms mean <span class="pass">Pass</span></td></tr>
+                <tr><th scope="row">Ledger overhead</th><td>&lt; 15 %</td><td>0.049 % <span class="pass">Pass</span></td></tr>
+                <tr><th scope="row">RAFT commit</th><td>&lt; 500 ms</td><td>4.3–4.8 ms <span class="pass">Pass</span></td></tr>
+              </tbody>
+            </table>
+            <p class="small">RAFT leader failover took 0.21 s, with 850 of 853 commits succeeding, on a standalone 3-replica cluster.</p>
+          </div>
+        </div>
+
+        <figure class="plate">
+          <a href="assets/img/trust-per-server.webp" class="plate-link" aria-label="Open the trust per server chart full size">
+            <img src="assets/img/trust-per-server.webp" width="2000" height="722" loading="lazy"
+                 alt="Trust score over time for each of 8 servers in both arms. Honest servers stay near 0.8 in both. Under attack, the zero-trust arm isolates srv1, srv3, srv6 and srv8, while the baseline's blackhole srv6 sits at trust 0 for 263 seconds without ever being isolated.">
+          </a>
+          <figcaption>Trust per server in both arms. No honest server was falsely accused in either arm.</figcaption>
+        </figure>
+
+        <h3 class="sub">Statistical evidence over 600 seeded runs</h3>
+        <p>
+          Live runs give fidelity but no confidence intervals, so a seeded simulation drives the real
+          selector, trust calculator and detectors: 5 strategies × 4 scenarios × 30 seeds. Paired
+          Wilcoxon signed-rank tests with Holm–Bonferroni correction show <strong>14 of 16 comparisons
+          significantly favour our system</strong> (p<sub>adj</sub> = 7.45 × 10⁻⁹), with 20–69 % fewer
+          SLO violations under attack. The two losses are in the attack-free scenario and come from a
+          stale load signal, which a faster poll largely closes.
+        </p>
+        <div class="table-scroll">
+          <table class="tbl">
+            <caption>Reduction in SLO-violation rate, zero trust against each baseline</caption>
+            <thead><tr><th scope="col">Scenario</th><th scope="col">Least-conn</th><th scope="col">Random</th><th scope="col">Round-robin</th><th scope="col">No-trust ablation</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Sybil attacker</th><td>−64.6 %</td><td>−29.6 %</td><td>−19.7 %</td><td>−15.1 %</td></tr>
+              <tr><th scope="row">Dropping attacker</th><td>−61.8 %</td><td>−49.4 %</td><td>−48.7 %</td><td>−25.3 %</td></tr>
+              <tr><th scope="row">Both attackers</th><td>−68.8 %</td><td>−52.3 %</td><td>−48.5 %</td><td>−29.8 %</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details class="more">
+          <summary>More result figures</summary>
+          <div class="gallery">
+            <figure class="plate">
+              <a href="assets/img/results-comparison.webp" class="plate-link" aria-label="Open the results comparison figure full size">
+                <img src="assets/img/results-comparison.webp" width="2000" height="1125" loading="lazy"
+                     alt="Bar charts comparing baseline and zero trust on packet delivery, availability, timeouts, p95 latency, fairness and requests to attackers, plus time to isolation and NFR results.">
+              </a>
+              <figcaption>The controlled comparison at a glance.</figcaption>
+            </figure>
+            <figure class="plate">
+              <a href="assets/img/load-share.webp" class="plate-link" aria-label="Open the load share chart full size">
+                <img src="assets/img/load-share.webp" width="1600" height="768" loading="lazy"
+                     alt="Share of routed requests per server in both arms; the zero-trust arm starves the four attacking servers.">
+              </a>
+              <figcaption>Share of requests per server.</figcaption>
+            </figure>
+            <figure class="plate">
+              <a href="assets/img/raft-failover.webp" class="plate-link" aria-label="Open the RAFT failover chart full size">
+                <img src="assets/img/raft-failover.webp" width="2000" height="2008" loading="lazy"
+                     alt="A 45-second RAFT run with role lanes, term, chain length and commit latency; the leader is killed at 15 s and restarted at 30 s.">
+              </a>
+              <figcaption>RAFT leader killed at 15 s, restarted at 30 s.</figcaption>
+            </figure>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Team -->
+    <section class="section" id="team" aria-labelledby="team-h">
+      <div class="wrap">
+        <h2 id="team-h">Team</h2>
+        <p class="section-lede">Team 50, Department of Computer Science and Engineering, Amrita Vishwa Vidyapeetham, Coimbatore.</p>
+        <div class="table-scroll">
+          <table class="tbl team">
+            <caption class="sr-only">Team members and register numbers</caption>
+            <thead><tr><th scope="col">Name</th><th scope="col">Register number</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">K R Jeevan Raj</th><td><code>CB.SC.U4CSE23262</code></td></tr>
+              <tr><th scope="row">Aravind Kumar M</th><td><code>CB.SC.U4CSE23303</code></td></tr>
+              <tr><th scope="row">Arjun Krishnakumar</th><td><code>CB.SC.U4CSE23307</code></td></tr>
+              <tr><th scope="row">Ashwin Kumar RM</th><td><code>CB.SC.U4CSE23308</code></td></tr>
+              <tr><th scope="row">Bhuvanesh S</th><td><code>CB.SC.U4CSE23544</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="guide"><span>Project guide</span> Dr. Radhika N, Professor, Department of CSE</p>
+      </div>
+    </section>
+
+    <!-- Progress -->
+    <section class="section" id="progress" aria-labelledby="progress-h">
+      <div class="wrap">
+        <h2 id="progress-h">Project progress</h2>
+        <p class="section-lede">About 60 % of the full scope is functional and measured, which was the target for Panel Review 1.</p>
+        <ol class="timeline">
+          <li class="done">
+            <h3>Requirements and design</h3>
+            <p>Problem scope, functional and non-functional requirements, feasibility, the trust formula and the phased plan.</p>
+            <span class="status">Done</span>
+          </li>
+          <li class="done">
+            <h3>Core implementation</h3>
+            <p>Trust-aware controller, trust model and anomaly gate, six attacks with delayed onset, PRESENT-80 admission, hash-chained ledger, live dashboard, the no-zero-trust control arm and the evaluation harness. Thirteen live runs.</p>
+            <span class="status">Done</span>
+          </li>
+          <li class="done">
+            <h3>Panel Review 1</h3>
+            <p>Architecture, implementation progress and the controlled comparison presented on 7 September 2026.</p>
+            <span class="status">Done</span>
+          </li>
+          <li class="now">
+            <h3>turncoat-sdn benchmark</h3>
+            <p>Turning the attackers, recordings, scorers and statistics into an open-source benchmark anyone can run. v0.1, the scaffold and simulator port, is in progress.</p>
+            <span class="status">In progress</span>
+          </li>
+          <li>
+            <h3>Remaining scope</h3>
+            <p>turncoat-sdn v0.2 to v1.0, wiring RAFT into the live controller, DDoS throttling, and the research paper.</p>
+            <span class="status">Planned</span>
+          </li>
+          <li>
+            <h3>Final review and submission</h3>
+            <p>Final report, live demonstration and recorded demo video.</p>
+            <span class="status">Planned</span>
+          </li>
+        </ol>
+        <p class="small">Partly built and stated openly: RAFT runs as a standalone 3-replica cluster but isn't yet wired into the live controller, and DDoS flooding is detected and classified but not yet throttled.</p>
+      </div>
+    </section>
+
+    <!-- Documentation -->
+    <section class="section" id="docs" aria-labelledby="docs-h">
+      <div class="wrap">
+        <h2 id="docs-h">Documentation</h2>
+        <ul class="doclist">
+          <li>
+            <div>
+              <h3>Architecture and design diagrams</h3>
+              <p>Layered architecture, task workflow, zero-trust gates, load-balancing flow and deployment view.</p>
+            </div>
+            <a class="btn" href="#method">View diagrams</a>
+          </li>
+          <li>
+            <div>
+              <h3>Evaluation results</h3>
+              <p>The controlled live comparison, containment times, non-functional requirements and the 600-run statistical study.</p>
+            </div>
+            <a class="btn" href="#results">View results</a>
+          </li>
+          <li>
+            <div>
+              <h3>turncoat-sdn documentation</h3>
+              <p>README, contribution guide and documentation plan for the open-source benchmark.</p>
+            </div>
+            <a class="btn" href="https://github.com/bhuvanesh-sudo/turncoat-sdn#readme">Read on GitHub</a>
+          </li>
+          <li class="pending">
+            <div>
+              <h3>Research paper</h3>
+              <p>An IEEE-style manuscript on the trust-formula finding and the controlled evaluation is in preparation.</p>
+            </div>
+            <span class="tag">In preparation</span>
+          </li>
+          <li class="pending">
+            <div>
+              <h3>Final project report</h3>
+              <p>Due with the final submission.</p>
+            </div>
+            <span class="tag">Planned</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- GitHub -->
+    <section class="section" id="code" aria-labelledby="code-h">
+      <div class="wrap">
+        <h2 id="code-h">GitHub repositories</h2>
+        <div class="repos">
+          <a class="repo" href="https://github.com/bhuvanesh-sudo/turncoat-sdn">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            <div>
+              <h3>bhuvanesh-sudo/turncoat-sdn</h3>
+              <p>The open-source benchmark built from this project: delayed-onset attacks, one event format, scorers and paired statistics.</p>
+            </div>
+          </a>
+          <a class="repo" href="https://github.com/Jeevan0814/documentation_portal">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            <div>
+              <h3>Jeevan0814/documentation_portal</h3>
+              <p>The source of this project portal.</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo -->
+    <section class="section" id="demo" aria-labelledby="demo-h">
+      <div class="wrap">
+        <h2 id="demo-h">Demonstration video</h2>
+        <div class="video-slot">
+          <div class="video-frame" role="img" aria-label="Demonstration video not yet published">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M26 21 L45 32 L26 43 Z" fill="currentColor"/></svg>
+            <p>The recorded demonstration will be published here after the final review.</p>
+          </div>
+          <div class="video-notes">
+            <h3>What it will show</h3>
+            <ul>
+              <li>The live dashboard: topology, packets moving and trust curves for all eight servers</li>
+              <li>Each attack arming on schedule and being isolated within seconds</li>
+              <li>An identity spoof refused at admission</li>
+              <li>The ledger detecting a tampered block in the browser</li>
+              <li>The same run with zero trust switched off, for comparison</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap foot-row">
+      <img class="uni" src="assets/img/amrita-logo.png" width="720" height="210" alt="Amrita Vishwa Vidyapeetham">
+      <p>
+        Zero Trust–Enabled SDN Architecture for Secure and Intelligent Load Balancing in Edge Networks.
+        Team 50, 23CSE498 Project Phase 2, Department of Computer Science and Engineering,
+        Amrita Vishwa Vidyapeetham, Coimbatore. Guided by Dr. Radhika N.
+      </p>
+      <p class="foot-small">Figures and numbers come from the team's recorded live runs of 5 September 2026 and the 600-run seeded evaluation.</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
