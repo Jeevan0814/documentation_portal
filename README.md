@@ -10,13 +10,14 @@ Vidyapeetham, Coimbatore, and guided by Dr. Radhika N.
 **Project source code:** https://github.com/a5hx/Zero-Trust-Enabled-SDN-Architecture
 
 The portal covers the project objectives, problem statement, methodology, results,
-team, progress, documentation, GitHub links and the demonstration video.
+the research paper and its references, team, progress, documentation, GitHub links
+and the demonstration video.
 
 ## Structure
 
 ```
 index.html            the whole portal, one page
-assets/css/style.css  styles, with automatic light and dark mode
+assets/css/style.css  styles (black theme; figures are colour-inverted to match)
 assets/js/main.js     highlights the current section in the navigation
 assets/img/           architecture diagrams and result figures (WebP), logo, favicon
 .nojekyll             tells GitHub Pages to serve the files as they are
