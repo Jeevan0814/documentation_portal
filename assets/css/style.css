@@ -548,3 +548,66 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .topo-turncoat-ring { animation: none; opacity: 0.4; }
 }
+
+/* ---------- revision 7: score-versus-gate finding ---------- */
+
+.finding figcaption { opacity: 0.9; }
+
+.race { width: 100%; border-collapse: collapse; margin: 1.25rem 0 1.4rem; font-size: 0.95rem; }
+.race th, .race td { text-align: left; padding: 0.5rem 0.6rem 0.5rem 0; border-bottom: 1px solid var(--rule-2); vertical-align: baseline; }
+.race thead th { font-size: 0.8rem; font-weight: 500; color: var(--ink-2); }
+.race tbody th { font-weight: 600; }
+.race td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.race .r-gate { color: var(--zt); font-weight: 700; font-size: 1.15rem; }
+.race .x { display: block; font-size: 0.78rem; color: var(--ink-2); font-weight: 500; }
+
+.ruler { margin-top: 0.4rem; }
+.ruler-track { position: relative; height: 0.5rem; border-radius: 999px; background: #232937; margin-top: 0.9rem; }
+.ruler-band {
+  position: absolute; top: -0.35rem; bottom: -0.35rem; border-radius: 4px;
+  background: rgba(255, 122, 61, 0.28); outline: 1px dashed rgba(255, 122, 61, 0.7);
+}
+.tick { position: absolute; top: -0.45rem; width: 2px; height: 1.4rem; margin-left: -1px; border-radius: 1px; }
+.ruler-scale { display: flex; justify-content: space-between; margin-top: 0.55rem; font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); }
+.ruler-key { list-style: none; margin: 0.8rem 0 0; padding: 0; display: grid; gap: 0.25rem; font-size: 0.84rem; color: var(--ink-2); }
+.ruler-key li { display: flex; gap: 0.55rem; align-items: baseline; }
+.ruler-key li::before { content: ""; flex: none; width: 0.6rem; height: 0.6rem; border-radius: 2px; transform: translateY(0.05rem); }
+.k-ship { background: #c3c9d4; } .ruler-key .k-ship::before { background: #c3c9d4; } .ruler-key .k-ship { background: none; }
+.tick.k-liar, .ruler-key .k-liar::before { background: var(--zt); }
+.tick.k-honest, .ruler-key .k-honest::before { background: var(--base); }
+.tick.k-works, .ruler-key .k-works::before { background: #f3c26b; }
+.tick.k-bad, .ruler-key .k-bad::before { background: #e5484d; }
+.ruler-key li { background: none !important; }
+
+/* what's new */
+.news { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--rule-2); }
+.news li { padding: 1.25rem 1.5rem 1.4rem 0; border-bottom: 1px solid var(--rule); }
+.news li:nth-child(2n) { padding-left: 1.5rem; padding-right: 0; border-left: 1px solid var(--rule); }
+.news h3 { margin-bottom: 0.45rem; }
+.news p { color: var(--ink-2); font-size: 0.98rem; }
+.news li:first-child h3, .news li:nth-child(2) h3 { color: #fff; }
+
+/* three-arm tables */
+.key-mid::before { background: #a5adbb; }
+.tbl .c-mid { color: #c3c9d4; }
+.tbl thead th.c-mid { color: #a5adbb; }
+.compare td.c-mid { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.compare { min-width: 46rem; }
+.tbl small { display: block; font-size: 0.74rem; font-weight: 400; color: var(--ink-3); }
+.tbl tr.row-zt th, .tbl tr.row-zt td { color: var(--zt); font-weight: 600; border-top: 1px solid var(--rule-2); }
+
+/* paper contents and tags */
+.paper-toc ul { margin: 0.3rem 0 0.2rem; padding-left: 1.2rem; list-style: disc; columns: 1; }
+.paper-toc ul li { padding: 0.1rem 0; font-size: 0.93rem; }
+.paper-toc { columns: 1; }
+.refs li.tagged .ref-title::after {
+  content: attr(data-tag); margin-left: 0.5rem; font-size: 0.75rem; color: var(--zt);
+  border: 1px solid rgba(255, 122, 61, 0.4); border-radius: 999px; padding: 0 0.45rem; white-space: nowrap;
+}
+.refs li.tagged[data-tag="misreporting prior art"] .ref-title::after { color: #f3c26b; border-color: rgba(243, 194, 107, 0.45); }
+
+@media (max-width: 960px) {
+  .news { grid-template-columns: 1fr; }
+  .news li:nth-child(2n) { padding-left: 0; border-left: 0; }
+}
+.race thead th.r-gate { font-size: 0.8rem; font-weight: 600; }
