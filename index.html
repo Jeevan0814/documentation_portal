@@ -108,7 +108,7 @@
             </tbody>
           </table>
 
-          <div class="ruler" role="img" aria-label="Trust score axis from 0.25 to 0.55. Shipped threshold 0.30. The attackers' lowest score was 0.40 to 0.41. Honest servers under load dipped to 0.42. A threshold of 0.45 isolates both attackers; 0.50 also quarantined an honest server in one of five runs.">
+          <div class="ruler" role="img" aria-label="Trust score axis from 0.25 to 0.55. Shipped threshold 0.30. The attackers' lowest score was 0.40 to 0.41. One charged timeout takes an honest server to about 0.42. A threshold of 0.45 isolates both attackers; 0.50 also quarantined an honest server in one of five runs.">
             <div class="ruler-track">
               <span class="ruler-band" style="left:50%;width:6.7%"></span>
               <span class="tick k-ship" style="left:16.7%"></span>
@@ -121,7 +121,7 @@
             <ul class="ruler-key" aria-hidden="true">
               <li class="k-ship">0.30 shipped threshold: isolates neither</li>
               <li class="k-liar">0.40–0.41 the attackers' lowest score</li>
-              <li class="k-honest">0.42 honest servers under load dip here</li>
+              <li class="k-honest">0.42 one charged timeout takes an honest server here</li>
               <li class="k-works">0.45 isolates both, slowly</li>
               <li class="k-bad">0.50 also quarantined an honest server, 1 of 5 runs</li>
             </ul>
@@ -129,7 +129,7 @@
 
           <p class="finding-note">
             So the score has a narrow, slow margin: it can isolate these attackers only inside a band
-            a few hundredths wide, which honest servers under load also reach. The gate is fast and
+            a few hundredths wide, which a single charged timeout also takes an honest server to. The gate is fast and
             has a wide margin. That is why the controller runs both rails.
           </p>
         </figure>
@@ -140,7 +140,7 @@
           <div><dt>8 of 8</dt><dd>attacks placed in the right family, in all 5 runs with both rails</dd></div>
           <div><dt>7.6–15.5 s</dt><dd>median onset-to-isolation per attacker over 5 runs; the baseline never isolates</dd></div>
           <div><dt>4 of 4</dt><dd>non-functional requirements pass, in each of the 5 runs</dd></div>
-          <div><dt>1,404</dt><dd>automated tests passing, 11 skipped (paper revision 7)</dd></div>
+          <div><dt>1,461</dt><dd>automated tests passing, 11 skipped (paper revision 8)</dd></div>
         </dl>
       </div>
     </section>
@@ -151,8 +151,8 @@
         <h2 id="new-h">What's new since Panel Review 1</h2>
         <p class="section-lede">
           Every result below is from repeated live runs on the emulated network, usually five per arm.
-          The sweep, the liar, witness, attestation and replica experiments were each scored against a
-          prediction the team committed before running them.
+          The sweep, the liar, witness, attestation, replica and witness-acting experiments were each
+          scored against a prediction the team committed before running them.
         </p>
         <ul class="news">
           <li>
@@ -178,6 +178,14 @@
           <li>
             <h3>Replicas that check the controller</h3>
             <p>Ledger replicas that replay the trust arithmetic rejected every forged score that reached them, 5,478 records with none rejected falsely. A controller that forges the evidence instead passed them; only the switch witness exposed it.</p>
+          </li>
+          <li>
+            <h3>A witness that acts, and holds</h3>
+            <p>83 further runs. Letting the switch witness's verdicts quarantine a server raised honest task success under forged evidence from 82.2% to 97.7%. Holding a blamed server until the witness sees it serve three trial connections in a row raised it to 99.1%, closing 95% of the gap to an honest run. One false action in 73 acting runs, after a host-wide stall.</p>
+          </li>
+          <li>
+            <h3>Two defects in our own probation path, measured</h3>
+            <p>Building the hold showed that probation trials reached a quarantined server only from its own switch (8.0% of trials), and that a timed-out trial could be charged to another server (43 times in 35 earlier runs). Both are fixed. The honest dips to 0.417–0.421 seen in the sweep were each one of those misattributed timeouts, not load.</p>
           </li>
           <li>
             <h3>Raft in the live controller</h3>
@@ -308,7 +316,7 @@
             <span class="phase-key" aria-hidden="true">D</span>
             <div>
               <h4>Enforcement, when a server fails verification</h4>
-              <p>Trust below 0.30, or the anomaly gate firing, triggers one cookie-matched rule delete, drop rules, and re-steering of in-flight work. A probation path lets a recovered server earn its way back.</p>
+              <p>Trust below 0.30, or the anomaly gate firing, triggers one cookie-matched rule delete, drop rules, and re-steering of in-flight work. A probation path lets a recovered server earn its way back. Optionally, a server the switch witness blames also raises the gate, and is held until the witness sees it serve trial connections.</p>
             </div>
           </li>
         </ol>
@@ -488,6 +496,24 @@
           </table>
         </div>
 
+        <h3 class="sub">When the switch witness acts</h3>
+        <p>A controller that forges a dropping server's evidence blinds its own detectors; only the switch witness sees the drops. Here its verdicts change what the controller does. Five runs per row. Quarantined: share of the dropper's time after its onset. Connections: handed to it after its onset. Two values are blackhole / grayhole.</p>
+        <div class="table-scroll">
+          <table class="tbl">
+            <caption class="sr-only">The witness observing, acting and holding, five runs per row</caption>
+            <thead><tr><th scope="col">Dropper</th><th scope="col">Witness</th><th scope="col">Quarantined</th><th scope="col">Connections</th><th scope="col">Honest task success</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Forged evidence</th><td>observes</td><td>0 %</td><td>770 <small>[766, 774]</small></td><td>82.24 % <small>[82.07, 82.42]</small></td></tr>
+              <tr><th scope="row">Forged evidence</th><td>acts</td><td>84.0 % <small>[82.6, 85.5]</small></td><td>135 <small>[122, 147]</small></td><td>97.68 % <small>[97.49, 97.87]</small></td></tr>
+              <tr class="row-zt"><th scope="row">Forged evidence</th><td>holds</td><td>95.3 % <small>[95.1, 95.6]</small></td><td>64 <small>[58, 70]</small></td><td>99.06 % <small>[98.96, 99.16]</small></td></tr>
+              <tr><th scope="row">Blackhole + grayhole</th><td>acts</td><td>54 / 76 %</td><td>32 / 62</td><td>99.11 % <small>[98.88, 99.35]</small></td></tr>
+              <tr><th scope="row">Blackhole + grayhole</th><td>holds</td><td>96 / 78 %</td><td>40 / 60</td><td>98.91 % <small>[98.81, 99.00]</small></td></tr>
+              <tr><th scope="row">None</th><td>holds</td><td>—</td><td>—</td><td>99.99 % <small>[99.97, 100]</small></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small">The forging dropper failed all 23 of its trials in every run and was never released. Against droppers the gate already contains, the hold buys little: each trial is a lost task, and a 50% grayhole passes three in a row after about fourteen trials, so it is released and re-held once or twice a run. The observe row is from the first acting batch; the others are from the final hold batch, in which all 245 trials were judged. The one false action came when the whole host stalled for one to two seconds and an honest server refused a burst of sixteen connections; the witness judges one window, and a rule requiring persistence across windows is not built yet.</p>
+
         <h3 class="sub">Detection quality</h3>
         <p>With both rails, all eight attacks were placed in the right family in all five runs. The exact label was right for 7 of 8 in four runs and 6 of 8 in one. The recurring miss is the blackhole labelled grayhole: once it is quarantined at about 10 s it receives almost no traffic, so the timeout-rate tell never accumulates a measured rate. None of the 40 honest subjects was placed in an attack class, in any arm or run.</p>
 
@@ -519,7 +545,7 @@
       <div class="wrap">
         <h2 id="paper-h">Research paper</h2>
         <article class="paper">
-          <p class="paper-status">Draft manuscript, revision 7, 23 October 2026. Not yet submitted.</p>
+          <p class="paper-status">Draft manuscript, revision 8, 25 October 2026. Not yet submitted.</p>
           <h3 class="paper-title">What Catches a Lie That Works? Trust Scores, Anomaly Gates and Load-Misreporting Servers in Zero-Trust Edge Load Balancing</h3>
           <p class="paper-authors">K R Jeevan Raj, Aravind Kumar M, Arjun Krishnakumar, Ashwin Kumar RM, Bhuvanesh S. Faculty guide: Dr. Radhika N.</p>
 
@@ -534,18 +560,19 @@
                 8-server, 40-device edge. In a five-run-per-arm ablation the score never isolated two
                 attackers that complete every task while the gate isolated both every time; a threshold
                 sweep shows the score can, but only within a band a few hundredths wide and 3.4–20×
-                more slowly. Those attackers were slow: the gate had caught a slow server, not a lie.
+                more slowly. Those attackers were slow, so the gate caught slowness, not a lie.
               </p>
               <p>
                 In 80 further runs, each against a prediction registered first, a liar serving at honest
                 speed with internally consistent claims gains nothing, while one that lies only in the
                 instantaneous load figure the router ranks on, with a truthful busy-time counter, wins
-                4.0 points of traffic above its fair share and is never caught; ranking on the verified
-                figure closes the hole at no measured honest cost. Emulated mixed hardware is not
-                mistaken for lying; switch counters joined with client reports name the lying party in
-                25 of 25 runs; attestation stops a tampered server before it serves; and ledger replicas
-                that replay the trust arithmetic reject every forged score, yet a controller forging
-                evidence passes them, blinds its own detectors, and only the switches expose it.
+                4.0 points of excess traffic and is never caught; ranking on the verified figure closes
+                the hole at no measured honest cost. Emulated mixed hardware is not mistaken for lying;
+                switch counters joined with client reports name the lying party in 25 of 25 runs;
+                attestation stops a tampered server before it serves; and ledger replicas that replay
+                the trust arithmetic reject every forged score, yet a controller forging evidence passes
+                them and blinds its own detectors. Only the switches expose it; acting on their verdicts
+                restores honest task success from 82% to 99%.
               </p>
             </div>
 
@@ -554,6 +581,7 @@
               <div><dt>3.4–20×</dt><dd>slower when the score alone does isolate them, at θ = 0.45</dd></div>
               <div><dt>+4.0 pts</dt><dd>traffic a split-claim liar wins, never caught; +0.01 once routing reads the verified figure</dd></div>
               <div><dt>25 of 25</dt><dd>runs in which the switch witness names the lying party</dd></div>
+              <div><dt>82% → 99%</dt><dd>honest task success under forged evidence, once the witness acts and holds</dd></div>
             </dl>
           </div>
 
@@ -564,7 +592,7 @@
             <li>Threat model and assumptions</li>
             <li>System architecture: the trust score and the anomaly gate</li>
             <li>What a score can do against a load-misreporting server</li>
-            <li>Evaluation methodology: the arms, replication, the liar experiment and four further experiments</li>
+            <li>Evaluation methodology: the arms, replication, the liar experiment and five further experiments</li>
             <li>Results
               <ul>
                 <li>The ablation at the shipped threshold</li>
@@ -574,6 +602,7 @@
                 <li>The switches as a third witness</li>
                 <li>What attestation adds to behaviour</li>
                 <li>Replicas that check the controller's arithmetic</li>
+                <li>When the witness acts</li>
                 <li>Service, availability and fairness</li>
                 <li>Data-plane response to a flooding client</li>
                 <li>Detection quality and non-functional requirements, including the live Raft failover</li>
@@ -581,7 +610,7 @@
               </ul>
             </li>
             <li>Discussion, including a retraction</li>
-            <li>Threats to validity</li>
+            <li>Threats to validity, including two defects in the probation path</li>
             <li>Limitations and future work</li>
             <li>Reproducibility</li>
             <li>Conclusion</li>
@@ -692,9 +721,14 @@
             <p>Each scored against a prediction committed before it ran, and written up in paper revision 7 (23 October 2026).</p>
             <span class="status">Done</span>
           </li>
+          <li class="done">
+            <h3>The witness acts and holds</h3>
+            <p>Letting the switch witness's verdicts quarantine servers, and holding a blamed server until it serves trials: 83 runs in four batches, each against its own prediction, with the two probation-path defects they exposed fixed. Written up in paper revision 8 (25 October 2026), and merged into <code>main</code>.</p>
+            <span class="status">Done</span>
+          </li>
           <li class="now">
-            <h3>Acting on the witness, and turncoat-sdn</h3>
-            <p>Letting the switch witness's verdicts quarantine servers; its first batch is scored and a follow-up is registered. In parallel, the open-source turncoat-sdn benchmark: v0.1 merged, v0.2 in progress.</p>
+            <h3>Witness persistence, and turncoat-sdn</h3>
+            <p>A witness rule that needs failures to persist across windows, so a host stall cannot trigger a false action; not built yet. In parallel, the open-source turncoat-sdn benchmark: v0.3.0 released, with v0.4's replicate, compare and plot commands merged.</p>
             <span class="status">In progress</span>
           </li>
           <li>
@@ -748,6 +782,20 @@
           </li>
           <li>
             <div>
+              <h3>The witness acting and holding</h3>
+              <p>The final hold batch's outcome against its registered prediction, the one false action traced through the recording, and both trial-path fixes measured.</p>
+            </div>
+            <a class="btn" href="https://github.com/a5hx/Zero-Trust-Enabled-SDN-Architecture/blob/feature/witness-hold/docs/predictions/withold3_2026-10-25_OUTCOME.md">OUTCOME.md</a>
+          </li>
+          <li>
+            <div>
+              <h3>Setup and running guide</h3>
+              <p>Installing on WSL2, every way to run, score and debug the system, and the replicate runner for experiments.</p>
+            </div>
+            <a class="btn" href="https://github.com/a5hx/Zero-Trust-Enabled-SDN-Architecture/blob/main/SETUP.md">SETUP.md</a>
+          </li>
+          <li>
+            <div>
               <h3>Raft consensus</h3>
               <p>What is built, how the controller commits to the cluster, and the live failover check.</p>
             </div>
@@ -775,7 +823,7 @@
             <span class="tag">Planned</span>
           </li>
         </ul>
-        <p class="small">The linked files are on the project's newest branch, <code>feature/witness-hold</code>, until it is merged into <code>main</code>.</p>
+        <p class="small">Everything up to the witness hold is merged into <code>main</code>. Paper revision 8 and its evidence are on <code>feature/witness-hold</code> until that branch is merged again, so the paper files link there.</p>
       </div>
     </section>
 
@@ -788,14 +836,14 @@
             <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
             <div>
               <h3>a5hx/Zero-Trust-Enabled-SDN-Architecture</h3>
-              <p>The project source: the os-ken trust-aware controller, trust engine, attack simulation, PRESENT-80 admission, hash-chained ledger and Raft, the live dashboard, the no-zero-trust control arm and the evaluation harness, with the setup guide and test suite.</p>
+              <p>The project source: the os-ken trust-aware controller, trust engine, switch witness, attack simulation, PRESENT-80 admission and server attestation, hash-chained ledger and Raft, the live dashboard, the no-zero-trust control arm and the evaluation harness, with the setup guide and test suite.</p>
             </div>
           </a>
           <a class="repo" href="https://github.com/bhuvanesh-sudo/turncoat-sdn">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
             <div>
               <h3>bhuvanesh-sudo/turncoat-sdn</h3>
-              <p>The open-source benchmark built from this project: delayed-onset attacks, one event format, scorers and paired statistics.</p>
+              <p>The open-source benchmark built from this project: delayed-onset attacks, one event format, scorers, paired statistics with bootstrap intervals, and comparison tables and figures.</p>
             </div>
           </a>
           <a class="repo" href="https://github.com/Jeevan0814/documentation_portal">
@@ -842,7 +890,7 @@
         Team 50, 23CSE498 Project Phase 2, Department of Computer Science and Engineering,
         Amrita Vishwa Vidyapeetham, Coimbatore. Guided by Dr. Radhika N.
       </p>
-      <p class="foot-small">Numbers come from paper revision 7 (23 October 2026): five live runs per arm for the replicated results, the experiments in What's new, and a 600-run seeded simulation. Each is traced to its evidence file in the project's NUMBERS.md.</p>
+      <p class="foot-small">Numbers come from paper revision 8 (25 October 2026): five live runs per arm for the replicated results, the experiments in What's new, and a 600-run seeded simulation. Each is traced to its evidence file in the project's NUMBERS.md.</p>
     </div>
   </footer>
 
